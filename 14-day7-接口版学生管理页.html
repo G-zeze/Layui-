@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理页</title>
+    <link rel="stylesheet" href="./layui-v2.13.9/layui/css/layui.css">
+</head>
+
+<body class="layui-bg-gray">
+    <!-- 导航栏 -->
+    <ul class="layui-nav">
+        <li class="layui-nav-item"><a href="javascript:;">首页</a></li>
+        <li class="layui-nav-item layui-this"><a href="javascript:;">学生管理</a></li>
+        <li class="layui-nav-item"><a href="javascript:;">考勤</a></li>
+    </ul>
+    <!-- 学生管理页面 -->
+    <div class="layui-container">
+        <h1 class="layui-font-20 layui-margin-3">学生管理</h1>
+        <div class="layui-card">
+            <div class="layui-card-header">学生列表</div>
+            <div class="layui-card-body">
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md4">
+                        <input type="text" class="layui-input" id="keyword">
+                    </div>
+                    <div class="layui-col-md8">
+                        <button class="layui-btn layui-btn-sm" id="searchBtn">搜索</button>
+                        <button class="layui-btn layui-btn-sm" id="addBtn">添加</button>
+                        <button class="layui-btn layui-btn-sm" id="showChecked">查看选中</button>
+                    </div>
+                </div>
+                <table class="layui-table" lay-filter="studentTable" id="studentTable"></table>
+            </div>
+        </div>
+    </div>
+
+    <script src="./layui-v2.13.9/layui/layui.js"></script>
+    <script>
+        layui.use(["element", "table", "layer"], function () {
+
+            const element = layui.element;
+            const table = layui.table;
+            const layer = layui.layer;
+
+            let students = []
+            // 画表格
+            table.render({
+                elem: "#studentTable",
+                cols: [[
+                    { type: "checkbox" },
+                    { field: "studentId", title: "学号", sort: true },
+                    { field: "studentName", title: "姓名" },
+                    {
+                        field: "studentGender", title: "性别", templet: function (d) {
+                            return d.studentGender + "生"
+                        }
+                    },
+                    { field: "studentClass", title: "班级", sort: true },
+                    {
+                        title: "操作", templet: function (d) {
+                            return "<a class='layui-btn layui-btn-xs' lay-event='edit'>编辑</a><a class='layui-btn layui-btn-xs layui-btn-danger' lay-event='delete'>删除</a>"
+                        }
+                    }
+                ]],
+                data: students,
+                page: true,
+                limit: 3
+            });
+            console.log("1. render 画完了，students 里有", students.length, "个");
+            fetch("/api/students").then(function(res){
+                return res.json();
+            }).then(function(list){
+                console.log("3. 拆完了，list 有", list.length, "个");
+                students=list;
+                table.reloadData("studentTable",{
+                    data:students,
+                    page:{curr:1}
+                });
+            });
+            console.log("2. fetch 下面的代码");
+            // 监测点击编辑按钮
+            table.on("tool(studentTable)", function (obj) {
+                if (obj.event === "edit") {
+                    layer.open({
+                        type: 1,
+                        title: "编辑学生",
+                        btn: ["保存", "取消"],
+                        content: "<div class='layui-padding-3'><input type='text' id='editName' class='layui-input' value='" + obj.data.studentName + "'></div>",
+                        yes: function (index) {
+                            const newName = document.querySelector("#editName").value;
+                            const stu = students.find(function (s) {
+                                return s.studentId === obj.data.studentId;
+                            });
+                            stu.studentName = newName;
+
+                            table.reloadData("studentTable", { data: students });
+                            layer.close(index);
+                            layer.msg("已修改");
+                        }
+                    })
+                }
+
+                else if (obj.event === "delete") {
+                    layer.confirm("确定要删除" + obj.data.studentName + "吗?", function (index) {
+                        students = students.filter(function (s) {
+                            return s.studentId !== obj.data.studentId;
+                        });
+                        table.reloadData("studentTable", {
+                            data: students,
+                            page: { curr: 1 }
+                        });
+                        layer.close(index);
+                        layer.msg("已删除" + obj.data.studentName);
+                    });
+                    
+                }
+            });
+
+            document.querySelector("#searchBtn").addEventListener("click",function(){
+                const keyword=document.querySelector("#keyword").value;
+                const result=students.filter(function(s){
+                    return s.studentName.includes(keyword)
+                });
+                table.reloadData("studentTable",{
+                    data:result,
+                    page:{curr:1}
+                });
+            });
+
+            document.querySelector("#addBtn").addEventListener("click",function(){
+               layer.open({
+                type:1,
+                title:"新增学生",
+                btn:["保存","取消"],
+                content:"<div class='layui-padding-3'><input class='layui-input' type='text' id='addId' placeholder='请输入学号'></div><div class='layui-padding-3'><input class='layui-input' type='text' id='addName' placeholder='请输入姓名'></div><div class='layui-padding-3'><input class='layui-input' type='text' id='addGender' placeholder='请输入性别'></div><div class='layui-padding-3'><input class='layui-input' type='text' id='addClass' placeholder='请输入班级'></div>",
+                yes:function(index){
+                    const id=document.querySelector("#addId").value;
+                    const name=document.querySelector("#addName").value;
+                    const gender=document.querySelector("#addGender").value;
+                    const cls=document.querySelector("#addClass").value;
+                    if(name===""){
+                        layer.msg("姓名不能为空");
+                        return;
+                    }
+
+                    students.push({studentId:id,studentName:name,studentGender:gender,studentClass:cls});
+                    table.reloadData("studentTable",{
+                        data:students,
+                        page:{curr:1}
+                    });
+                    layer.close(index);
+                    layer.msg("已保存");
+                }
+                
+               }); 
+            });
+            document.querySelector("#showChecked").addEventListener("click",function(){
+                const status=table.checkStatus("studentTable");
+                layer.msg("已选中"+status.data.length+"条数据");
+            });
+        });
+    </script>
+
+</body>
+
+</html>

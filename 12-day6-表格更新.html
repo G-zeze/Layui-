@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./layui-v2.13.9/layui/css/layui.css">
+</head>
+<body>
+    <button class="layui-btn layui-btn-sm" id="showChecked">查看选中</button>
+    <button class="layui-btn layui-btn-sm" id="onlyGirls">只显示女生</button>
+    <button class="layui-btn layui-btn-sm" id="showAll">显示全部</button>
+    <button class="layui-btn layui-btn-sm" id="addBtn">添加学生</button> 
+    <input type="text" id="keyword" class="layui-input" placeholder="输入姓名">
+    <button class="layui-btn layui-btn-sm" id="searchBtn">搜索</button>
+    <table id="studentTable" lay-filter="studentTable"></table>
+    <script src="./layui-v2.13.9/layui/layui.js"></script>
+    <script>
+        // layui.use()方法: 加载模块,并在回调函数中使用模块
+        layui.use(['table','layer'],function(){
+            const table=layui.table;
+            const layer=layui.layer;
+            // let赋值之后 在后面可以重新赋值
+            let students=[
+                {studentId:"2023001",studentName:"张三",studentGender:"男",studentClass:"一班"},
+                {studentId:"2023002",studentName:"李四",studentGender:"女",studentClass:"二班"},
+                {studentId:"2023003",studentName:"王五",studentGender:"男",studentClass:"三班"},
+                {studentId:"2023004",studentName:"赵六",studentGender:"女",studentClass:"四班"},
+                {studentId:"2023005",studentName:"孙七",studentGender:"男",studentClass:"五班"},
+                {studentId:"2023006",studentName:"周八",studentGender:"女",studentClass:"六班"},
+                {studentId:"2023007",studentName:"吴九",studentGender:"男",studentClass:"七班"},
+                {studentId:"2023008",studentName:"郑十",studentGender:"女",studentClass:"八班"},
+            ];
+            
+            // table.render()方法: 渲染表格
+            table.render({
+                // 绑定的table元素
+                elem:"#studentTable",
+                // 表头
+                cols:[[
+                    // 勾选框
+                    {type:"checkbox"},
+                    // field:对应数据的属性名, title:表头显示的内容, sort:是否允许排序
+                    {field:"studentId",title:"学号",sort:true},
+                    {field:"studentName",title:"姓名"},
+                    // templet:自定义模板,可以对数据进行处理后再显示,在这里是在性别后面加上"生"
+                    {field:"studentGender",title:"性别",templet:function(d){
+                    return d.studentGender+"生";}},
+
+                    {field:"studentClass",title:"班级",sort:true},
+                    // templet:自定义模板,可以在表格中显示按钮,并且可以通过lay-event属性来绑定事件
+                    {title:"操作",templet:function(d){
+                        return '<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a> <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>'
+                    }}
+                ]],
+                // 数据
+                data:students,
+
+                // 对应的分页参数
+                page:true,
+                limit:5
+            });
+            // 监听操作栏:主要根据event属性来判断点击的是哪个按钮,然后执行对应的操作
+            table.on("tool(studentTable)",function(obj){
+                console.log("obj:",obj)
+                if(obj.event==="edit"){
+                    layer.open({
+                        type:1,
+                        title:"编辑学生",
+                        btn:["保存","取消"],
+                        content:'<div class="layui-padding-3"><input type="text" id="editName" class="layui-input" value="'+obj.data.studentName+'"></div>' ,
+                        yes:function(index){
+                            console.log("index:",index)
+                            const newName=document.querySelector("#editName").value;
+                            const stu=students.find(function(s){
+                                console.log("s:",s)
+                                return s.studentId===obj.data.studentId;
+                            });
+                            stu.studentName=newName;
+                            
+                            table.reloadData("studentTable",{data:students});
+                            layer.close(index);
+                            layer.msg("已修改");
+                        }
+                        
+                        
+                    });
+                }
+
+                else if(obj.event==="delete"){
+                    // .confirm()方法: 弹出确认框,第一个参数是提示信息,第二个参数是回调函数,当点击确定时执行回调函数
+                    layer.confirm("确定要删除"+obj.data.studentName+"吗?",function(index){
+                        students=students.filter(function(s){
+                             return s.studentId !== obj.data.studentId;
+                        });
+                        table.reloadData("studentTable",{
+                            data:students,
+                            page:{curr:1}
+                        });
+                        layer.close(index);
+                        layer.msg("已删除"+obj.data.studentName);
+                    });
+                };
+            });
+
+            document.querySelector("#showChecked").addEventListener("click",function(){
+                // .checkStatus()方法: 获取选中行的状态信息
+                const status = table.checkStatus("studentTable");
+                console.log(status);
+                console.log(status.data);
+                // .length获取选中数据的条数(data是一个数组)
+                layer.msg("已选中"+status.data.length+"条数据");
+            });
+            document.querySelector("#onlyGirls").addEventListener("click",function(){
+                // table.reloadData()方法: 重新加载表格数据,第一个参数是表格的id,第二个参数是一个对象,可以设置data属性来指定新的数据,也可以设置page属性来指定新的分页参数
+                const girls=students.filter(function(s){
+                    return s.studentGender==="女";
+                });
+                table.reloadData("studentTable",{
+                    data:girls,
+                    // curr:当前页码下标,默认值:1
+                    page:{curr:1}
+                });
+            });
+            document.querySelector("#showAll").addEventListener("click",function(){
+                table.reloadData("studentTable",{
+                    data:students,
+                    page:{curr:1}
+                });
+            });
+            document.querySelector("#searchBtn").addEventListener("click",function(){
+                // .value
+                const keyword=document.querySelector("#keyword").value;
+                console.log(keyword);
+                // filter()方法: 过滤数组,返回一个新数组,新数组中的元素是通过回调函数返回true的元素
+                const result=students.filter(function(s){
+                    // includes()方法: 判断字符串是否包含指定的子字符串,返回true或false
+                    return s.studentName.includes(keyword);
+                });
+                console.log(result);
+
+                table.reloadData("studentTable",{
+                    data:result,
+                    page:{curr:1}
+                });
+            });
+            document.querySelector("#addBtn").addEventListener("click",function(){
+                layer.open({
+                    type:1,
+                    title:"新增学生",
+                    btn:["保存","取消"],
+                    content:"<div class='layui-padding-3'><input type='text' class='layui-input' id='addId' placeholder='请输入学号'></div><div class='layui-padding-3'><input type='text' class='layui-input' id='addName' placeholder='请输入姓名'></div><div class='layui-padding-3'><input type='text' class='layui-input' id='addGender' placeholder='请输入性别'></div><div class='layui-padding-3'><input type='text' class='layui-input' id='addClass' placeholder='请输入班级'></div>",
+                    yes:function(index){
+                        const id=document.querySelector("#addId").value;
+                        const name=document.querySelector("#addName").value;
+                        const gender=document.querySelector("#addGender").value;
+                        const cls=document.querySelector("#addClass").value;
+
+                        if(name===''){
+                            layer.msg("姓名不能为空");
+                            return;
+                        };
+                        
+                        students.push({studentId:id,studentName:name,studentGender:gender,studentClass:cls});
+                        table.reloadData("studentTable",{
+                            data:students,
+                            page:{curr:1}
+                        });
+                        layer.close(index);
+                        layer.msg("已新增")
+                    }
+                    
+                    
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./layui-v2.13.9/layui/css/layui.css">
+</head>
+<body>
+    <!-- 表格1 -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>编号</th>
+                <th>课程名</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>HTML</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>CSS</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>JavaScript</td>
+            </tr>
+        </tbody>
+    </table>
+    <!-- 表格2 -->
+    <button class="layui-btn layui-btn-sm" id="showChecked">查看选中</button>
+
+    <table id="studentTable" lay-filter="studentTable">
+
+    </table>
+    <script src="./layui-v2.13.9/layui/layui.js"></script>
+    <script>
+        layui.use(['table','layer'],function(){
+            const table=layui.table;
+            const layer=layui.layer;
+            table.render({
+                // 绑定的table元素
+                elem:"#studentTable",
+                // 表头
+                cols:[[
+                    {type:"checkbox"},
+
+                    {field:"studentId",title:"学号",sort:true},
+                    {field:"studentName",title:"姓名"},
+
+                    {field:"studentGender",title:"性别",templet:function(d){
+                    return d.studentGender+"生";}},
+
+                    {field:"studentClass",title:"班级",sort:true},
+                
+                    {title:"操作",templet:function(d){
+                        return '<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a> <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>'
+                    }}
+
+            ]],
+                // 数据
+                data:[
+                    {studentId:1,studentName:"张三",studentGender:"男",studentClass:"一班"},
+                    {studentId:2,studentName:"李四",studentGender:"男",studentClass:"二班"},
+                    {studentId:3,studentName:"王五",studentGender:"女",studentClass:"三班"},
+                    {studentId:4,studentName:"赵六",studentGender:"女",studentClass:"四班"},
+                    {studentId:5,studentName:"孙七",studentGender:"男",studentClass:"五班"},
+                    {studentId:6,studentName:"周八",studentGender:"女",studentClass:"六班"},
+                    {studentId:7,studentName:"吴九",studentGender:"男",studentClass:"七班"},
+                    {studentId:8,studentName:"郑十",studentGender:"女",studentClass:"八班"}
+                ],
+                // 对应的分页参数
+                page:true,
+                limit:5
+            });
+            table.on("tool(studentTable)",function(obj){
+                if(obj.event==="edit"){
+                    layer.msg("编辑"+obj.data.studentName);
+                }
+
+                else if(obj.event==="delete"){
+                    layer.confirm("确定要删除"+obj.data.studentName+"吗?",function(index){
+                        obj.del();
+                        layer.close(index);
+                        layer.msg("已删除"+obj.data.studentName);
+                    });
+                };
+            });
+
+            document.querySelector("#showChecked").addEventListener("click",function(){
+                // .checkStatus()方法: 获取选中行的状态信息
+                const status = table.checkStatus("studentTable");
+                console.log(status);
+                console.log(status.data);
+                // .length获取选中数据的条数(data是一个数组)
+                layer.msg("已选中"+status.data.length+"条数据");
+            });
+
+        });
+    </script>
+</body>
+</html>

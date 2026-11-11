@@ -1,64 +1,192 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学生录入页</title>
     <link rel="stylesheet" href="./layui-v2.13.9/layui/css/layui.css">
 </head>
-<body>
+<body class="layui-bg-gray">
+    <!-- 导航 -->
     <ul class="layui-nav">
         <li class="layui-nav-item layui-this"><a href="javascript:;">概览</a></li>
         <li class="layui-nav-item"><a href="javascript:;">学生管理</a></li>
         <li class="layui-nav-item"><a href="javascript:;">考勤</a></li>
     </ul>
-
+<!-- 主要内容 -->
     <div class="layui-container">
-        <h1>学生信息录入</h1>
+        <!-- 统计卡片 -->
+        <h1 class="layui-font-20 layui-margin-3">学生信息录入</h1>
         <div class="layui-row layui-col-space15">
             <div class="layui-col-md3 layui-col-xs6">
                 <div class="layui-card">
                     <div class="layui-card-header">学生总数</div>
-                    <div class="layui-card-body">45</div>
+                    <div class="layui-card-body">
+                        <span class="layui-font-20">45</span>
+                    </div>
                 </div>
             </div>
             <div class="layui-col-md3 layui-col-xs6">
                 <div class="layui-card">
                     <div class="layui-card-header">男生</div>
-                    <div class="layui-card-body">25</div>
+                    <div class="layui-card-body">
+                        <span class="layui-font-20">25</span>
+                    </div>
                 </div>
             </div>
             <div class="layui-col-md3 layui-col-xs6">
                 <div class="layui-card">
                     <div class="layui-card-header">女生</div>
-                    <div class="layui-card-body">20</div>
+                    <div class="layui-card-body">
+                        <span class="layui-font-20">20</span>
+                    </div>
                 </div>
             </div>
             <div class="layui-col-md3 layui-col-xs6">
                 <div class="layui-card">
                     <div class="layui-card-header">今日出勤</div>
-                    <div class="layui-card-body">43</div>
+                    <div class="layui-card-body">
+                        <span class="layui-font-20">43</span>
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- 录入表单 -->
         <div class="layui-row layui-col-space15">
             <div class="layui-col-md8 layui-col-xs12">
-                <form class="layui-form">
-                    <div class="layui-form-item">
-                        <label for="studentName" class="layui-form-label">学生姓名</label>
-                        <div class="layui-input-block">
-                            <input 
-                            type="text"
-                            class="layui-input"
-                            id="studentName"
-                            name="studentName"
-                            >
-                        </div>
+                <div class="layui-card">
+                    <div class="layui-card-header">新增学生</div>
+                    <div class="layui-card-body">
+                        <form class="layui-form">
+                            <div class="layui-form-item">
+                                <label for="studentName" class="layui-form-label">学生姓名</label>
+                                <div class="layui-input-block">
+                                    <input 
+                                    type="text"
+                                    class="layui-input"
+                                    id="studentName"
+                                    name="studentName"
+                                    lay-verify="required"
+                                    placeholder="请输入姓名"
+                                    >
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label" for="studentId">学生学号</label>
+                                <div class="layui-input-block">
+                                    <input
+                                    type="text"
+                                    class="layui-input"
+                                    id="studentId"
+                                    name="studentId"
+                                    lay-verify="required"
+                                    placeholder="请输入学号"
+                                    >   
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label" for="studentGender">学生性别</label>
+                                <div class="layui-input-block">
+                                    <select name="studentGender" id="studentGender" lay-verify="required">
+                                        <option value="">请选择性别</option>
+                                        <option value="male">男</option>
+                                        <option value="female">女</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label" for="studentBirth">出生日期</label>
+                                <div class="layui-input-block">
+                                    <input
+                                    type="text"
+                                    class="layui-input"
+                                    id="studentBirth"
+                                    name="studentBirth"
+                                    lay-verify="required"
+                                    placeholder="请输入出生日期"
+                                    >
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button class="layui-btn" type="submit" id="saveButton" lay-filter="saveStudentBtn" lay-submit>保存</button>
+                                    <button class="layui-btn layui-btn-primary" type="reset" id="resetButton">重置</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
-            <div class="layui-col-md4 layui-col-xs12"></div>
+            <!-- 录入须知 -->
+            <div class="layui-col-md4 layui-col-xs12">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        录入须知
+                    </div>
+                    <div class="layui-card-body">
+                        <div class="layui-tab">
+                            <ul class="layui-tab-title">
+                                <li class="layui-this">须知</li>
+                                <li>常见问题</li>
+                            </ul>
+                            <div class="layui-tab-content">
+                                <div class="layui-tab-item layui-show">
+                                    <p>1. 请确保学生信息的准确性。</p>
+                                    <p>2. 学生学号必须唯一。</p>
+                                    <p>3. 出生日期格式为YYYY-MM-DD。</p>
+                                </div>
+                                <div class="layui-tab-item">
+                                    <p>1. 如何修改学生信息？</p>
+                                    <p>2. 学生学号可以修改吗？</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 班级说明按钮 -->
+                        <button class="layui-btn layui-margin-3" type="button" id="classInfoButton">班级说明</button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>   
+    </div>
+    <script src="./layui-v2.13.9/layui/layui.js"></script>
+    <script>
+        // 使用layui模块
+        layui.use(["form","layer","laydate","element"],function(){
+            const form = layui.form;
+            const layer = layui.layer;
+            const laydate = layui.laydate;
+            const element = layui.element;
+            // 下拉框渲染
+            form.render();
+            // 日期选择器渲染
+            laydate.render({
+                elem:"#studentBirth",
+                type:"date",
+                format:"yyyy-MM-dd"
+            });
+            
+            // 保存按钮复选点击事件
+            function saveStudent(data){
+                layer.confirm("确定保存吗?",function(index){
+                    console.log("保存数据:",data.field);
+                    layer.close(index);
+                    layer.msg("已收到表单数据");
+                })
+                return false;
+            };
+            form.on("submit(saveStudentBtn)", saveStudent);
+
+            // 班级说明按钮点击事件
+            const classInfoButton=document.querySelector("#classInfoButton");
+            classInfoButton.addEventListener("click",function(){
+                layer.open({
+                    type:1,
+                    title:"班级说明",
+                    content:"<div class='layui-padding-3'>本班级为2024级计算机科学与技术专业，共有45名学生，其中男生25名，女生20名。请各位同学按时提交作业，遵守课堂纪律。</div>"
+                })
+            })
+
+        });
+    </script>  
 </body>
 </html>
